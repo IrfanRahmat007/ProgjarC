@@ -1,4 +1,0 @@
-ProgjarC
-========
-
-Tugas Progjar C
