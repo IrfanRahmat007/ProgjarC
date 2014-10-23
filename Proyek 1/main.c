@@ -285,14 +285,13 @@ int checkAttachment(int index)
 {
     int total=0;
     char filename[8];
-    int attachment;
-    int fd,i,j,k,retval,count;
+    int attachment=0;
+    int fd,fd2,i,j,k,retval,count;
     char *temp,*temp2,*temp3,*temp4;
     char buf[2];
     char line[4096];
     temp=temp2=temp3=temp4=NULL;
     sprintf(&filename,"%d.txt",index);
-    printf("%s\n",filename);
     fd=open(filename,O_RDONLY);
     retval=count=read(fd,&buf,sizeof(buf)-1);
     buf[retval]='\0';
@@ -310,13 +309,13 @@ int checkAttachment(int index)
             if(strcmp(temp,"Content-Type: multipart/mixed")==0)
             {
                 attachment=1;
-                printf("Ada attachment di email ini\n");
+                printf("There's an attachment in this message\n");
                 break;
             }
             else if(strcmp(temp,"Content-Type: multipart/alternative")==0)
             {
-                attachment=1;
-                printf("Email ini mengandung versi html\n");
+                attachment=2;
+                printf("There's an alternative version of this email\n");
                 break;
             }
             bzero(line,sizeof(&line));
@@ -328,8 +327,141 @@ int checkAttachment(int index)
             strcat(&line,buf);
         }
     }
-    close(fd);
+    if(attachment==0)
+    {
+            bzero(line,sizeof(line));
+            close(fd);
+            return 0;
+    }
+    if(attachment==2)
+    {
+        bzero(line,sizeof(&line));
+        temp2=NULL;
+        retval=read(fd,&buf,sizeof(buf)-1);
+        buf[retval]='\0';
+        strcpy(line,buf);
+        while(retval!=0)            //Baca hingga awal html
+        {
+            if(buf[0]=='\n')
+            {
+                temp=strtok_r(line,";",&temp2);
+                if(temp==NULL)
+                {
+                    continue;
+                }
+                if(strcmp(temp,"Content-type: text/html")==0)
+                {
+                    attachment=3;
+                    break;
+                }
+                bzero(line,sizeof(&line));
+            }
+            retval=read(fd,&buf,sizeof(buf)-1);
+            buf[retval]='\0';
+            if(buf[0]!='\n' || buf[0]!='\r')
+            {
+                strcat(&line,buf);
+            }
+        }
+    }
+    if(attachment==3)
+    {
+        sprintf(&filename,"%d.html",index);
+        fd2=open(filename,O_WRONLY | O_CREAT,0666);
+        retval=read(fd,&buf,sizeof(buf)-1);
+        buf[retval]='\0';
+        while(retval>0)            //Tulis hingga abis
+        {
+            write(fd2,buf,sizeof(buf));
+            retval=read(fd,&buf,sizeof(buf)-1);
+            buf[retval]='\0';
+        }
+        close(fd2);
+    }
+    if(attachment==1)
+    {
+        bzero(line,sizeof(&line));
+        temp2=NULL;
+        retval=read(fd,&buf,sizeof(buf)-1);
+        buf[retval]='\0';
+        strcpy(line,buf);
+        int stop2=0;
+        while(retval!=0)            //Baca hingga awal header Attachment
+        {
+
+            if(buf[0]=='\n')
+            {
+                temp=strtok_r(line,";",&temp2);
+                if(temp==NULL)
+                {
+                    continue;
+                }
+                if(strcmp(temp,"Content-Type: image/png")==0)
+                {
+                    attachment=4;
+                    break;
+                }
+                bzero(line,sizeof(&line));
+            }
+            retval=read(fd,&buf,sizeof(buf)-1);
+            buf[retval]='\0';
+            if(buf[0]!='\n' || buf[0]!='\r')
+            {
+                strcat(&line,buf);
+            }
+        }
+    }
+    if(attachment==4)
+    {
+        int stop3=0;
+        while(stop3!=4)                             //Melewatkan header attachment menuju ke isi attachment
+        {
+            retval=read(fd,&buf,sizeof(buf)-1);
+            buf[retval]='\0';
+            if(buf[0]=='\n')
+            {
+                stop3++;
+            }
+        }
+        sprintf(&filename,"%d.tes",index);
+        fd2=0;
+        fd2=open(filename,O_WRONLY | O_CREAT,0666);
+        retval=read(fd,&buf,sizeof(buf)-1);
+        buf[retval]='\0';
+        int stop=0;
+        while(retval!=0)            //Tulis hingga akhir attachment
+        {
+
+            if(buf[0]=='\n'||buf[0]=='-')
+            {
+                stop++;
+            }
+            else
+            {
+                stop=0;
+            }
+            if(stop>1)
+            {
+                break;
+            }
+            write(fd2,buf,strlen(buf));
+            retval=read(fd,&buf,sizeof(buf)-1);
+            buf[retval]='\0';
+        }
+        close(fd2);
+        char msg[20];
+        strcat(&msg,"base64 -d -i ");       //Membuat pesan untuk fungsi base64 linux
+        strcat(&msg,filename);
+        bzero(filename,sizeof(filename));
+        sprintf(&filename,"%d.png",index);
+        strcat(&msg," > ");
+        strcat(&msg,filename);
+        system(msg);            //Menjalankan fungsi base64 linux
+    }
+
+
     bzero(line,sizeof(line));
+    close(fd);
     return 0;
 }
 
