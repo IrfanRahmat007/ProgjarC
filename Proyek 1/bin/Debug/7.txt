@@ -1,0 +1,23 @@
+Return-Path: <tes@its-sby.edu>
+X-Original-To: tes@its-sby.edu
+Delivered-To: tes@its-sby.edu
+Received: from localhost (localhost [127.0.0.1])
+	by mail.its-sby.edu (Postfix) with ESMTP id C84726A09AE
+	for <tes@its-sby.edu>; Tue, 21 Oct 2014 18:33:03 +0700 (WIT)
+X-Virus-Scanned: Debian amavisd-new at mail.its-sby.edu
+Received: from mail.its-sby.edu ([127.0.0.1])
+	by localhost (mail.its-sby.edu [127.0.0.1]) (amavisd-new, port 10024)
+	with ESMTP id wa-ZsAYYBvKs for <tes@its-sby.edu>;
+	Tue, 21 Oct 2014 18:33:03 +0700 (WIT)
+Received: from mail.its-sby.edu (unknown [10.151.34.218])
+	by mail.its-sby.edu (Postfix) with ESMTPA id EABFA6A09AD
+	for <tes@its-sby.edu>; Tue, 21 Oct 2014 18:29:11 +0700 (WIT)
+Subject: Test R
+Date: Sel, 21 Oktober 2014 18:30:14 +0700
+From: revant@averse.net
+To: tes@its-sby.edu
+Message-Id: <20141021113303.C84726A09AE@mail.its-sby.edu>
+
+Ada seseorang yang mau coba SSL/TLS
+Ternyata dapetnya STARTTLS. Berarti nggak usah implementasi SSL/TLS
+Selain itu

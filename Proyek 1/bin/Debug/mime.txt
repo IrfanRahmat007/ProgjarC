@@ -1,0 +1,3 @@
+text/html html
+image/png png
+text/plain txt

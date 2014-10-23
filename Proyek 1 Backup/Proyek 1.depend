@@ -1,0 +1,16 @@
+# depslib dependency file v1.0
+1413990158 source:/home/irfan/Documents/Progjar/Tugas 2/Proyek 1/main.c
+	<stdio.h>
+	<stdlib.h>
+	<unistd.h>
+	<arpa/inet.h>
+	<string.h>
+	<sys/types.h>
+	<sys/stat.h>
+	<errno.h>
+	<fcntl.h>
+	<sys/select.h>
+	<sys/ioctl.h>
+	<linux/sockios.h>
+	<netinet/tcp.h>
+
