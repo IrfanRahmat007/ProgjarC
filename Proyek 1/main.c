@@ -215,7 +215,7 @@ int getMsgList()                                                     //Mengambil
         bzero(content,sizeof(content));
         bzero(subject,sizeof(subject));
         bzero(from,sizeof(from));
-        while(subject[0]==0)
+        while(from[0]==0)
         {
             temp=temp2=temp3=temp4=NULL;
             bzero(msg,sizeof(msg));
@@ -232,7 +232,7 @@ int getMsgList()                                                     //Mengambil
             c=retval=read(sockcli,&buf,sizeof(buf)-1);
             buf[retval]='\0';
             strcpy(content,buf);
-            while(buf[retval-1]!='\n' && content[retval-2]!='\r' && content[retval-3]!='.') // Jika ada tanda '.\r\n', berhenti. Jika tidak, ulangi.
+            while(!(buf[retval-1]=='\n' && buf[retval-2]=='\r' && buf[retval-3]=='.')) // Jika ada tanda '.\r\n', berhenti. Jika tidak, ulangi.
             {
                 retval=read(sockcli,&buf,sizeof(buf)-1);
                 buf[retval]='\0';
@@ -283,13 +283,54 @@ int getMsgList()                                                     //Mengambil
 
 int checkAttachment(int index)
 {
+    int total=0;
     char filename[8];
-    int fd,i,j,k;
+    int attachment;
+    int fd,i,j,k,retval,count;
     char *temp,*temp2,*temp3,*temp4;
     char buf[2];
     char line[4096];
+    temp=temp2=temp3=temp4=NULL;
     sprintf(&filename,"%d.txt",index);
-
+    printf("%s\n",filename);
+    fd=open(filename,O_RDONLY);
+    retval=count=read(fd,&buf,sizeof(buf)-1);
+    buf[retval]='\0';
+    bzero(&line,sizeof(line));
+    strcpy(&line,buf);
+    while(retval!=0)
+    {
+        if(buf[0]=='\n')
+        {
+            temp=strtok_r(line,";",&temp2);
+            if(temp==NULL)
+            {
+                continue;
+            }
+            if(strcmp(temp,"Content-Type: multipart/mixed")==0)
+            {
+                attachment=1;
+                printf("Ada attachment di email ini\n");
+                break;
+            }
+            else if(strcmp(temp,"Content-Type: multipart/alternative")==0)
+            {
+                attachment=1;
+                printf("Email ini mengandung versi html\n");
+                break;
+            }
+            bzero(line,sizeof(&line));
+        }
+        retval=read(fd,&buf,sizeof(buf)-1);
+        buf[retval]='\0';
+        if(buf[0]!='\n' || buf[0]!='\r')
+        {
+            strcat(&line,buf);
+        }
+    }
+    close(fd);
+    bzero(line,sizeof(line));
+    return 0;
 }
 
 int download(int no)                                                //Fungsi Download Email
@@ -337,8 +378,12 @@ int download(int no)                                                //Fungsi Dow
         exit(-1);
     }
     write(fd,&content[strlen(temp4)+3],count-strlen(temp4)-3);
-    while(retval<c)
+    while(!(content[count-1]=='\n' && content[count-2]=='\r' && content[count-3]=='.'))
     {
+        if(content[count-1]=='\n' && content[count-2]=='\r' && content[count-3]=='.')
+        {
+            break;
+        }
         count=read(sockcli,&content,sizeof(content)-1);              //Tuliskan Konten ke file
         retval+=count;
         content[count]='\0';
@@ -346,6 +391,7 @@ int download(int no)                                                //Fungsi Dow
 
     }
     close(fd);
+    checkAttachment(no);
 }
 
 int main()

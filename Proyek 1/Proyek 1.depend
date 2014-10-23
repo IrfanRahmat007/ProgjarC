@@ -1,5 +1,5 @@
 # depslib dependency file v1.0
-1414066992 source:/home/irfan/Documents/Progjar/Tugas 2/Proyek 1/main.c
+1414080791 source:/home/irfan/Documents/Progjar/Tugas 2/Proyek 1/main.c
 	<stdio.h>
 	<stdlib.h>
 	<unistd.h>
