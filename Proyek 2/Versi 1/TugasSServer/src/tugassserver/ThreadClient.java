@@ -118,12 +118,34 @@ public class ThreadClient implements Runnable {
     
     public void UploadFile(SRR msg) throws IOException
     {
-
+        File Dir=new File(basePath+"\\Data\\");
+        File Content=new File(basePath+"\\Data\\"+msg.getFilename());
+        if(Content.exists())
+        {
+            Content.delete();
+        }
+        Content.createNewFile();
+        FileOutputStream FS = new FileOutputStream(Content);
+        FS.write(msg.getContent());
+        FS.close();
     }
     
     public void DownloadFile(SRR msg) throws IOException
     {
-
+        int FileIndex = msg.getFileIndex();
+        File Dir=new File(basePath+"\\Data\\");
+        File Content=new File(basePath+"\\Data\\"+Dir.list()[FileIndex]);
+        FileInputStream FS = new FileInputStream(Content);
+        int len = (int)Content.length();
+        byte temp[] = new byte[len];
+        FS.read(temp);
+        SRR Response = new SRR();
+        Response.setType(1);
+        Response.setResponseCode(11);
+        Response.setFilename(Dir.list()[FileIndex]);
+        Response.setContent(temp);
+        sendObject(Response);
+        FS.close();
     }
 
     public void sendObject(SRR msg) throws IOException

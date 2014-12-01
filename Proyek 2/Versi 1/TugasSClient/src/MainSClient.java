@@ -330,6 +330,23 @@ public class MainSClient extends javax.swing.JFrame {
             log("No file selected.");
             return;
         }
+        byte[] Content;
+        Content = new byte[(int)SF.length()];
+        try {
+            FileInputStream FIS = new FileInputStream(SF);
+            FIS.read(Content);
+            SRR SR = new SRR();
+            SR.setType(0);
+            SR.setRequestCode(2);
+            SR.setContent(Content);
+            SR.setFilename(SF.getName());
+            Send(SR);
+            CmdRefresh.doClick();
+        } catch (FileNotFoundException ex) {
+            Logger.getLogger(MainSClient.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (IOException ex) {
+            Logger.getLogger(MainSClient.class.getName()).log(Level.SEVERE, null, ex);
+        }
     }//GEN-LAST:event_CmdUploadActionPerformed
 
     private void formWindowClosing(java.awt.event.WindowEvent evt) {//GEN-FIRST:event_formWindowClosing
@@ -350,11 +367,36 @@ public class MainSClient extends javax.swing.JFrame {
     }//GEN-LAST:event_formWindowClosing
 
     private void CmdDownloadActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_CmdDownloadActionPerformed
-        // TODO add your handling code here:
-        if(LstFile.getSelectedIndex()==-1)
-        {
-            log("No file selected");
-            return;
+        try {
+            // TODO add your handling code here:
+            if(LstFile.getSelectedIndex()==-1)
+            {
+                log("No file selected");
+                return;
+            }
+            SRR SR = new SRR();
+            SR.setType(0);
+            SR.setRequestCode(3);
+            SR.setFileIndex(LstFile.getSelectedIndex());
+            Send(SR);
+            SRR SR2 = Receive();
+            JFileChooser OPF = new JFileChooser();
+            OPF.setSelectedFile(new File(SR2.getFilename()));
+            OPF.setCurrentDirectory(new File(System.getProperty("user.home")));
+            int result2 = OPF.showSaveDialog(null);
+            if (result2 == JFileChooser.APPROVE_OPTION) {
+                File selectedFile = OPF.getSelectedFile();
+                if (selectedFile.exists()) {
+                    selectedFile.delete();
+                }
+                selectedFile.createNewFile();
+                FileOutputStream FOS = new FileOutputStream(selectedFile);
+                FOS.write(SR2.getContent());
+                FOS.close();
+                // user selects a file
+            }
+        } catch (IOException ex) {
+            Logger.getLogger(MainSClient.class.getName()).log(Level.SEVERE, null, ex);
         }
     }//GEN-LAST:event_CmdDownloadActionPerformed
 
